@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,27 +17,52 @@ import {
   Trash2,
   CheckCircle,
   AlertCircle,
-  Zap,
   Target,
   Minus,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Combobox from "@/components/global/custom-combobox";
+import { toast } from "sonner";
+
+// Types
+type TeamOption = {
+  value: number;
+  label: string;
+};
+
+// Constants
+const defaultTeams: TeamOption[] = [
+  { value: 2, label: "2 Teams" },
+  { value: 4, label: "4 Teams" },
+  { value: 8, label: "8 Teams" },
+  { value: 16, label: "16 Teams" },
+  { value: 32, label: "32 Teams" },
+  { value: 64, label: "64 Teams" },
+];
 
 function Knockout() {
   const router = useRouter();
-  const [participantCount, setParticipantCount] = useState(4);
-  const [names, setNames] = useState<string[]>(["", "", "", ""]);
-  const [tournamentName, setTournamentName] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleCountChange = (value: number) => {
-    const newCount = Math.max(2, Math.min(64, value));
-    setParticipantCount(newCount);
-    const updatedNames = Array(newCount)
-      .fill("")
-      .map((_, i) => names[i] || "");
-    setNames(updatedNames);
-  };
+  // State
+  const [participantCount, setParticipantCount] = useState<number>(4);
+  const [names, setNames] = useState<string[]>(["", "", "", ""]);
+  const [tournamentName, setTournamentName] = useState<string>("");
+  const [selectTeam, setSelectTeam] = useState<number>(4);
+
+  // Handlers
+  const handleCountChange = useCallback(
+    (value: number) => {
+      const clamped = Math.max(2, Math.min(64, value));
+      const evenValue = clamped % 2 === 0 ? clamped : clamped + 1;
+
+      setParticipantCount(evenValue);
+
+      const updatedNames = Array(evenValue)
+        .fill("")
+        .map((_, i) => names[i] || "");
+      setNames(updatedNames);
+    },
+    [names]
+  );
 
   const handleNameChange = (index: number, value: string) => {
     const updated = [...names];
@@ -44,31 +70,14 @@ function Knockout() {
     setNames(updated);
   };
 
-  const handleRandomTeamCount = () => {
-    setIsGenerating(true);
-    setTimeout(() => {
-      const min = 2;
-      const max = 64;
-      const evenNumbers = Array.from(
-        { length: (max - min) / 2 + 1 },
-        (_, i) => min + i * 2
-      );
-      const randomCount =
-        evenNumbers[Math.floor(Math.random() * evenNumbers.length)];
-      handleCountChange(randomCount);
-      setIsGenerating(false);
-    }, 500);
-  };
-
   const generateRandomNames = () => {
-    const sampleNames = Array.from(
+    const newNames = Array.from(
       { length: participantCount },
-      (_, idx) => `Team-${idx + 1}`
-    );
+      (_, i) => `Team-${i + 1}`
+    ).sort(() => Math.random() - 0.5);
 
-    const shuffled = [...sampleNames].sort(() => Math.random() - 0.5);
-    const newNames = shuffled.slice(0, participantCount);
     setNames(newNames);
+    toast.success("Random team names generated successfully.");
   };
 
   const addParticipant = () => {
@@ -85,16 +94,25 @@ function Knockout() {
 
   const clearAllNames = () => {
     setNames(Array(participantCount).fill(""));
+    toast.success("Team names cleared.");
   };
 
+  const handleChangeSelectTeam = (val: number) => {
+    setSelectTeam(val);
+    handleCountChange(val);
+    toast.success("Team count updated.");
+  };
+
+  // Derived Values
   const isValid =
     names.every((name) => name.trim() !== "") && tournamentName.trim() !== "";
+
   const filledCount = names.filter((name) => name.trim() !== "").length;
+
   const completionPercentage = Math.round(
     (filledCount / participantCount) * 100
   );
 
-  // Calculate tournament rounds
   const rounds = Math.round(Math.log2(participantCount));
 
   return (
@@ -128,7 +146,7 @@ function Knockout() {
           <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
             <div
               className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${completionPercentage}%` }}
+              style ={{ width: `${completionPercentage}%` }}
             />
           </div>
         </div>
@@ -251,15 +269,11 @@ function Knockout() {
               <Separator />
 
               <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full justify-start gap-2"
-                  onClick={handleRandomTeamCount}
-                  disabled={isGenerating}
-                >
-                  <Zap className="h-4 w-4" />
-                  {isGenerating ? "Generating..." : "Random Count"}
-                </Button>
+                <Combobox
+                  value={selectTeam}
+                  onChange={(val) => handleChangeSelectTeam(Number(val))}
+                  options={defaultTeams}
+                />
 
                 <Button
                   variant="outline"
@@ -276,7 +290,7 @@ function Knockout() {
                   onClick={clearAllNames}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Clear All
+                  Clear All Name
                 </Button>
               </div>
             </CardContent>
@@ -316,7 +330,7 @@ function Knockout() {
                       placeholder={`Enter name for participant ${i + 1}`}
                       onChange={(e) => handleNameChange(i, e.target.value)}
                       className={`transition-all duration-200 ${
-                        names[i].trim()
+                        names[i]?.trim()
                           ? "border-green-300 focus:border-green-500"
                           : "border-gray-300 focus:border-blue-500"
                       }`}
