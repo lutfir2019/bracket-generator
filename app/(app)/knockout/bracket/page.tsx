@@ -1,7 +1,7 @@
 "use client";
 
 import { Trophy } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Bracket,
   Seed,
@@ -14,60 +14,110 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Combobox from "@/components/global/custom-combobox";
 import { toast } from "sonner";
-
-const initialRounds: IRoundProps[] = [
-  {
-    title: "Round One",
-    seeds: [
-      {
-        id: 1,
-        date: new Date().toDateString(),
-        teams: [
-          { id: 1, name: "Team A", score: 7 },
-          { id: 2, name: "Team B", score: 6 },
-        ],
-      },
-      {
-        id: 2,
-        date: new Date().toDateString(),
-        teams: [
-          { id: 3, name: "Team C", score: 2 },
-          { id: 4, name: "Team D", score: 3 },
-        ],
-      },
-    ],
-  },
-  {
-    title: "Final",
-    seeds: [
-      {
-        id: 3,
-        date: new Date().toDateString(),
-        teams: [
-          { id: 5, name: "Winner 1", score: 0 },
-          { id: 6, name: "Winner 2", score: 0 },
-        ],
-      },
-    ],
-  },
-];
+import useBracketStore from "@/stores/bracket";
+import { useRouter } from "next/navigation";
 
 export default function BracketPage() {
-  const [rounds, setRounds] = useState<IRoundProps[]>(initialRounds);
   const [tabIndex, setTabIndex] = useState(0);
+  const [rounds, setRounds] = useState<IRoundProps[]>([]);
+  const bracketStore = useBracketStore();
+  const router = useRouter();
 
-  const teamNames = Array.from(
-    new Set(
-      initialRounds.flatMap((round) =>
-        round.seeds.flatMap((seed) =>
-          seed.teams.map((team) => ({
-            value: team?.name || "-",
-            label: team?.name || "-",
-          }))
-        )
+  const shuffleAndGenerateRounds = () => {
+    const allTeams = bracketStore.item?.teams ?? [];
+
+    // Jika tim kurang dari 2, tidak perlu buat bracket
+    if (allTeams.length < 2) {
+      setRounds([]);
+      return;
+    }
+
+    // Acak tim
+    const shuffled = [...allTeams].sort(() => Math.random() - 0.5);
+
+    // Hitung jumlah ronde berdasarkan tim (log base 2 dibulatkan ke atas)
+    const totalRounds = Math.ceil(Math.log2(shuffled.length));
+    const paddedSize = 2 ** totalRounds;
+
+    // Tambahkan 'BYE' untuk melengkapi jumlah tim jadi kelipatan 2^n
+    while (shuffled.length < paddedSize) {
+      shuffled.push({
+        id: `bye-${shuffled.length}`,
+        name: "BYE",
+      });
+    }
+
+    const rounds: IRoundProps[] = [];
+
+    for (let roundIndex = 0; roundIndex < totalRounds; roundIndex++) {
+      const seeds: ISeedProps[] = [];
+      const matchCount = Math.pow(2, totalRounds - roundIndex - 1);
+
+      for (let i = 0; i < matchCount; i++) {
+        let team1, team2;
+
+        if (roundIndex === 0) {
+          team1 = shuffled[i * 2];
+          team2 = shuffled[i * 2 + 1];
+        } else {
+          // Placeholder untuk winner dari ronde sebelumnya
+          team1 = {
+            id: `w-${roundIndex}-${i * 2}`,
+            name: `Winner ${i * 2 + 1}`,
+          };
+          team2 = {
+            id: `w-${roundIndex}-${i * 2 + 1}`,
+            name: `Winner ${i * 2 + 2}`,
+          };
+        }
+
+        seeds.push({
+          id: i + 1,
+          date: new Date().toDateString(),
+          teams: [
+            { id: team1.id, name: team1.name, score: 0 },
+            { id: team2.id, name: team2.name, score: 0 },
+          ],
+        });
+      }
+
+      rounds.push({
+        title:
+          roundIndex === totalRounds - 1
+            ? "Final"
+            : roundIndex === totalRounds - 2
+            ? ["Final", "Semifinal"][roundIndex]
+            : `Round ${roundIndex + 1}`,
+        seeds,
+      });
+    }
+
+    setRounds(rounds);
+  };
+
+  useEffect(() => {
+    if (bracketStore.item?.teams?.length) {
+      shuffleAndGenerateRounds();
+    } else {
+      router.push("/knockout");
+    }
+  }, [bracketStore.item]);
+
+  const teamNames = bracketStore.item
+    ? Array.from(
+        new Map(
+          bracketStore.item.teams.map((team) => [
+            team.id,
+            {
+              value: team.name,
+              label: team.name,
+            },
+          ])
+        ).values()
+      ).sort((a, b) =>
+        a.label.localeCompare(b.label, undefined, { numeric: true })
       )
-    )
-  );
+    : [];
 
   const [editingSeed, setEditingSeed] = useState<{
     roundIdx: number;
@@ -197,7 +247,6 @@ export default function BracketPage() {
                   </SeedTeam>
                 </div>
               </SeedItem>
-              <div className="text-xs text-center">{seed.date}</div>
               <div className="text-center mt-1">
                 <button
                   onClick={() => handleEdit(roundIndex, seedIndex, seed)}

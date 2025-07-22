@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Combobox from "@/components/global/custom-combobox";
 import { toast } from "sonner";
+import useBracketStore from "@/stores/bracket";
 
 // Types
 type TeamOption = {
@@ -47,6 +48,7 @@ function Knockout() {
   const [names, setNames] = useState<string[]>(["", "", "", ""]);
   const [tournamentName, setTournamentName] = useState<string>("");
   const [selectTeam, setSelectTeam] = useState<number>(4);
+  const bracketStore = useBracketStore();
 
   // Handlers
   const handleCountChange = useCallback(
@@ -115,6 +117,20 @@ function Knockout() {
 
   const rounds = Math.round(Math.log2(participantCount));
 
+  const handleGenerateTournament = () => {
+    bracketStore.addItem({
+      id: String(Date.now()),
+      title: tournamentName,
+      teams: names.map((name, idx) => ({ id: String(idx), name })),
+    });
+
+    toast.success("Generate Tournament Bracket Successfully");
+
+    setTimeout(() => {
+      router.push("/knockout/bracket");
+    }, 300);
+  };
+
   return (
     <div className="min-h-full">
       <div className="container mx-auto px-4 py-8">
@@ -146,7 +162,7 @@ function Knockout() {
           <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
             <div
               className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
-              style ={{ width: `${completionPercentage}%` }}
+              style={{ width: `${completionPercentage}%` }}
             />
           </div>
         </div>
@@ -348,9 +364,7 @@ function Knockout() {
             size="lg"
             className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             disabled={!isValid}
-            onClick={() => {
-              router.push("/knockout/bracket");
-            }}
+            onClick={handleGenerateTournament}
           >
             <Trophy className="h-5 w-5 mr-2" />
             Generate Tournament Bracket
