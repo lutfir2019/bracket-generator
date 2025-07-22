@@ -147,3 +147,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+.small-scrollbar::-webkit-scrollbar {
+  height: 6px; /* horizontal scrollbar */
+  width: 6px;  /* vertical scrollbar */
+}
+
+.small-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.small-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}

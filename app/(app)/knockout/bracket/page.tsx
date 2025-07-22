@@ -16,6 +16,7 @@ import Combobox from "@/components/global/custom-combobox";
 import { toast } from "sonner";
 import useBracketStore from "@/stores/bracket";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function BracketPage() {
   const [tabIndex, setTabIndex] = useState(0);
@@ -83,11 +84,7 @@ export default function BracketPage() {
 
       rounds.push({
         title:
-          roundIndex === totalRounds - 1
-            ? "Final"
-            : roundIndex === totalRounds - 2
-            ? ["Final", "Semifinal"][roundIndex]
-            : `Round ${roundIndex + 1}`,
+          roundIndex === totalRounds - 1 ? "Final" : `Round ${roundIndex + 1}`,
         seeds,
       });
     }
@@ -169,15 +166,21 @@ export default function BracketPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex md:hidden tabs flex-wrap justify-center gap-2 mb-4">
+      <div className="flex md:hidden justify-center gap-4 mb-4 overflow-x-auto min-w-md px-2 small-scrollbar">
         {rounds.map((r, i) => (
-          <Button
+          <button
             key={r.title}
-            variant={tabIndex === i ? "default" : "outline"}
             onClick={() => setTabIndex(i)}
+            className={cn(
+              "relative px-4 py-2 whitespace-nowrap font-semibold text-sm transition-colors duration-200",
+              {
+                "text-accent border-b-2 border-accent": tabIndex === i,
+                "text-muted-foreground hover:text-accent": tabIndex !== i,
+              }
+            )}
           >
             {r.title}
-          </Button>
+          </button>
         ))}
       </div>
 
