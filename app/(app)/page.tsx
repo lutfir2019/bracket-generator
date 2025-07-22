@@ -287,15 +287,21 @@ export default function Home() {
               Join thousands of organizers who trust our platform for their
               competitions.
             </p>
-            <Button
-              size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8 py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-200"
-              onClick={() => router.push("#tournament-types")}
-            >
-              <Trophy className="mr-2 h-5 w-5" />
-              Create Tournament Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <div className="flex justify-center">
+              <Button
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 font-semibold 
+    text-sm sm:text-lg 
+    px-4 py-2 sm:px-8 sm:py-3 
+    shadow-lg hover:shadow-xl 
+    transition-all duration-200 flex items-center justify-center"
+                onClick={() => router.push("#tournament-types")}
+              >
+                <Trophy className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <span className="whitespace-nowrap">Create Tournament Now</span>
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
