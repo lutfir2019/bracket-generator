@@ -132,17 +132,28 @@ export default function BracketPage() {
 
   const handleSave = () => {
     if (editingSeed) {
-      const updatedRounds = [...rounds];
-      const seed =
-        updatedRounds[editingSeed.roundIdx].seeds[editingSeed.seedIdx];
-      seed.teams = teamInputs.map((name, idx) => ({
-        ...seed.teams[idx],
-        name,
-        score: scoreInputs[idx],
-      }));
+      const updatedRounds = rounds.map((round, rIdx) =>
+        rIdx === editingSeed.roundIdx
+          ? {
+              ...round,
+              seeds: round.seeds.map((seed, sIdx) =>
+                sIdx === editingSeed.seedIdx
+                  ? {
+                      ...seed,
+                      teams: teamInputs.map((name, idx) => ({
+                        ...seed.teams[idx],
+                        name,
+                        score: scoreInputs[idx],
+                      })),
+                    }
+                  : seed
+              ),
+            }
+          : round
+      );
+
       setRounds(updatedRounds);
       setEditingSeed(null);
-
       toast.success("Updated successfully.");
     }
   };
@@ -163,6 +174,15 @@ export default function BracketPage() {
         <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Knockout Bracket
         </h1>
+      </div>
+
+      <div className="text-center mb-2">
+        <span className="text-sm sm:text-base font-medium text-muted-foreground">
+          Tournament Name:{" "}
+          <span className="text-primary font-semibold">
+            {bracketStore.item?.title}
+          </span>
+        </span>
       </div>
 
       {/* Tabs */}
@@ -218,6 +238,7 @@ export default function BracketPage() {
       {/* Bracket */}
       <div className="bg-card overflow-x-auto py-5">
         <Bracket
+          key={rounds.map((r) => r.title).join("-")}
           rounds={rounds}
           renderSeedComponent={({
             seed,
