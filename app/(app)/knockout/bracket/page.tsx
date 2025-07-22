@@ -166,7 +166,7 @@ export default function BracketPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex md:hidden justify-center gap-4 mb-4 overflow-x-auto min-w-md px-2 small-scrollbar">
+      <div className="flex md:hidden justify-center gap-4 mb-4 overflow-x-auto min-w-full px-2 small-scrollbar">
         {rounds.map((r, i) => (
           <button
             key={r.title}
