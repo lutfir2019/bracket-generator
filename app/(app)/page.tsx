@@ -56,6 +56,10 @@ export default function Home() {
     },
   ];
 
+  useEffect(() => {
+    console.log("👋 Halo! Selamat datang di aplikasi BracketGen!");
+  }, []);
+
   return (
     <div className="min-h-full">
       {/* Hero Section */}

@@ -24,8 +24,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("👋 Halo! Selamat datang di aplikasi BracketGen!");
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
