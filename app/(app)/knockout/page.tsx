@@ -53,12 +53,9 @@ function Knockout() {
   // Handlers
   const handleCountChange = useCallback(
     (value: number) => {
-      const clamped = Math.max(2, Math.min(64, value));
-      const evenValue = clamped % 2 === 0 ? clamped : clamped + 1;
+      setParticipantCount(value);
 
-      setParticipantCount(evenValue);
-
-      const updatedNames = Array(evenValue)
+      const updatedNames = Array(value)
         .fill("")
         .map((_, i) => names[i] || "");
       setNames(updatedNames);
@@ -84,13 +81,13 @@ function Knockout() {
 
   const addParticipant = () => {
     if (participantCount < 64) {
-      handleCountChange(participantCount + 2);
+      handleCountChange(participantCount + 1);
     }
   };
 
   const removeParticipant = () => {
     if (participantCount > 2) {
-      handleCountChange(participantCount - 2);
+      handleCountChange(participantCount - 1);
     }
   };
 
@@ -255,7 +252,6 @@ function Knockout() {
                     type="number"
                     min={2}
                     max={64}
-                    step={2}
                     value={participantCount}
                     onChange={(e) => handleCountChange(Number(e.target.value))}
                     className="flex-1"

@@ -23,6 +23,7 @@ export default function BracketPage() {
   const [rounds, setRounds] = useState<IRoundProps[]>([]);
   const bracketStore = useBracketStore();
   const router = useRouter();
+  const [renderKey, setRenderKey] = useState(0);
 
   const shuffleAndGenerateRounds = () => {
     const allTeams = bracketStore.item?.teams ?? [];
@@ -154,6 +155,7 @@ export default function BracketPage() {
 
       setRounds(updatedRounds);
       setEditingSeed(null);
+      setRenderKey((prev) => prev + 1);
       toast.success("Updated successfully.");
     }
   };
@@ -238,7 +240,7 @@ export default function BracketPage() {
       {/* Bracket */}
       <div className="bg-card overflow-x-auto py-5">
         <Bracket
-          key={rounds.map((r) => r.title).join("-")}
+          key={renderKey}
           rounds={rounds}
           renderSeedComponent={({
             seed,
