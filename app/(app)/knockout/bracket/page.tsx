@@ -102,19 +102,25 @@ export default function BracketPage() {
   }, [bracketStore.item]);
 
   const teamNames = bracketStore.item
-    ? Array.from(
-        new Map(
-          bracketStore.item.teams.map((team) => [
-            team.id,
-            {
-              value: team.name,
-              label: team.name,
-            },
-          ])
-        ).values()
-      ).sort((a, b) =>
-        a.label.localeCompare(b.label, undefined, { numeric: true })
-      )
+    ? [
+        ...Array.from(
+          new Map(
+            bracketStore.item.teams.map((team) => [
+              team.id,
+              {
+                value: team.name,
+                label: team.name,
+              },
+            ])
+          ).values()
+        ).sort((a, b) =>
+          a.label.localeCompare(b.label, undefined, { numeric: true })
+        ),
+        {
+          value: "BYE",
+          label: "BYE",
+        },
+      ]
     : [];
 
   const [editingSeed, setEditingSeed] = useState<{
