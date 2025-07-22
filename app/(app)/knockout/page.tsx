@@ -136,7 +136,7 @@ function Knockout() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center flex-wrap justify-center gap-3 mb-4">
             <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white">
               <Trophy className="h-8 w-8" />
             </div>

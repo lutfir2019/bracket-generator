@@ -16,6 +16,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex items-center flex-wrap justify-center gap-3 mb-6">
             <div className="relative">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg">
                 <Trophy className="h-8 w-8" />

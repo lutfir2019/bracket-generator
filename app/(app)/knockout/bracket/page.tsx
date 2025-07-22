@@ -156,7 +156,7 @@ export default function BracketPage() {
   return (
     <div className="min-h-full pt-10 px-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-5 text-center">
         <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white">
           <Trophy className="h-8 w-8" />
         </div>
